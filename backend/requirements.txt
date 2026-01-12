@@ -6,6 +6,6 @@ scikit-learn
 joblib
 matplotlib
 scipy
-google-generativeai
+google-genai
 python-dotenv
 uvicorn

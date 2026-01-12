@@ -5,10 +5,11 @@ import joblib
 import os
 from dotenv import load_dotenv
 from pathlib import Path
-import google.generativeai as genai
-from fastapi.responses import StreamingResponse
+import google.genai as genai
+from fastapi.responses import StreamingResponse, FileResponse
 import csv
 import io
+from fastapi.staticfiles import StaticFiles
 
 
 load_dotenv()
@@ -29,11 +30,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Serve static files from frontend
+frontend_dir = Path(__file__).parent.parent / "frontend"
+app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="static")
+
 # Load resources - use the directory where this script is located
 backend_dir = Path(__file__).parent
 df = pd.read_csv(backend_dir / "aadhaar_merged_dataset.csv")
 df["date"] = pd.to_datetime(df["date"])
 model = joblib.load(backend_dir / "aadhaar_service_stress_model.pkl")
+
+@app.get("/")
+def read_root():
+    return FileResponse(frontend_dir / "index.html")
 
 @app.get("/states")
 def get_states():
